@@ -13,7 +13,7 @@ function connectToServer(linenum) {
 				//console.log("Got back junk");
             			console.log('ajax failed. reloading...');
 				connectToServer(0);
-				$("#cd_count").html("Error, reloading...");
+				$("#tail_window").html("Error, reloading...");
 		        } 
 			else {
 				//console.log("Got back good data");
@@ -34,7 +34,7 @@ function connectToServer(linenum) {
                 		});// end each
 
 		                var newlines = items.join( "" );
-        		        $("#cd_count").prepend(newlines);
+        		        $("#tail_window").prepend(newlines);
 
 		                connectToServer(count);
 
@@ -47,7 +47,7 @@ function connectToServer(linenum) {
             		if(status == "timeout") {
 				console.log('ajax failed. reloading...');
                                 connectToServer(0);
-                                $("#cd_count").html("Local timeout, reloading...");
+                                $("#tail_window").html("Local timeout, reloading...");
             		}// end if
         	} // end error
 	}); // end ajax
