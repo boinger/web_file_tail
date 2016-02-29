@@ -25,7 +25,7 @@ if (!$num) {
 }
 else {
 	//error_log("Num passed!");
-	$nextline = $num+1;
+	$nextline = $num++;
 	$safety_max = 130; // this is a number of seconds, it should be longer than the ajax timeout
 	sleep(2);
 	$cmd = "$sudo $wc -l $logfile | $cut -d \" \" -f 1 | $tr -d '\n' 2>/dev/null";
