@@ -16,6 +16,13 @@
             position: absolute;
             font-family: "Courier New", monospace;
             font-size: 9pt;
+            white-space: pre-wrap;
+            overscroll-behavior-y: contain;
+            scroll-snap-type: y proximity;
+            scroll-padding: -5px;
+        }
+        div#tail_window > div:last-child {
+          scroll-snap-align: end;
         }
       </style>
   </head>
