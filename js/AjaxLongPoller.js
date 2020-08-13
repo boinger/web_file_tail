@@ -23,26 +23,28 @@ function connectToServer(linenum) {
                     connectToServer(linenum);
                 }
                 //console.log("Count "+count);
-                var loglines = data.loglines;
-                loglines.reverse();
-                var l = 0;
-                $.each(loglines, function(key, val) {
-                    l = l + 1;
+                $.each(data.loglines, function(key, val) {
                     //console.log("Val "+val.toString());
-                    $("#tail_window").prepend("<br />");
                     items.push(val.toString());
                     var newlines = items.join("");
-                    // Let's sanitize output
-                    $("#tail_window").prepend(document.createTextNode(newlines));
-
+                    var div = document.createElement('div');
+                    clean_line = document.createTextNode(newlines);
+                    div.appendChild(clean_line);
+                    $("#tail_window").append(div);
                     items = [];
                 }); // end each
+                // truncate the output if it starts to get long....
+                $('#tail_window').each(function(){
+                    maxlength = 50000;
+                    thislength = $(this).html().length;
+                    if (thislength > maxlength) {
+                        lengthdelta = thislength - maxlength;
+                        var truncated = $(this).html().substr(lengthdelta);
+                        $(this).html('[...] ' + truncated);
+                    }
+                });
 
                 connectToServer(count);
-
-
-
-
             } // end else
         }, // end success
         error: function(request, status, err) {
