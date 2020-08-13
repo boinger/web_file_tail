@@ -28,13 +28,16 @@ function connectToServer(linenum) {
         		        loglines.reverse();
         		        var l = 0;
         		        $.each( loglines, function( key, val ) {
-                        		l = l+1;
-					//console.log("Val "+val.toString());
-                        		items.push("<br />"+val.toString());
-                		});// end each
+                    		l = l+1;
+							//console.log("Val "+val.toString());
+							$("#tail_window").prepend("<br />");
+                    		items.push(val.toString());
+                    		var newlines = items.join( "" );
+                    		// Let's sanitize output
+    		        		$("#tail_window").prepend(document.createTextNode(newlines));
 
-		                var newlines = items.join( "" );
-        		        $("#tail_window").prepend(newlines);
+    		        		items = [];
+                		});// end each
 
 		                connectToServer(count);
 
