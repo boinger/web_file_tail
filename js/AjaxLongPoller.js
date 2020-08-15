@@ -1,8 +1,8 @@
-
 function connectToServer(file_to_tail, linenum) {
-    $.ajax({
+    cts = $.ajax({
         dataType: "json",
-        url: "/admin/logtail",
+        url: "/admin/logtail", // Python option
+        //url: "LongPoller.php", // original PHP option
         data: { num: linenum, tailfile: file_to_tail },
         type: 'POST',
         timeout: 120000, // in milliseconds
@@ -10,18 +10,18 @@ function connectToServer(file_to_tail, linenum) {
             if (data == null) {
                 //console.log("Got back junk");
                 console.log('ajax failed. reloading...');
-                connectToServer(file_to_tail,0);
+                connectToServer(file_to_tail, 0);
                 $("#tail_window").html("Error, reloading...");
             } else {
                 //console.log("Got back good data");
                 var items = [];
                 var count = parseInt(data.count);
-                $("#logname").text('Tailing file: '+ data.filename);
+                $("#logname").text('Tailing file: ' + data.filename);
                 if (count < 0) {
                     console.log('ajax failed. reloading...');
-                    connectToServer(file_to_tail,linenum);
+                    connectToServer(file_to_tail, linenum);
                 } else if (count === 0) {
-                   $("#tail_window").text('[Empty file]');
+                    $("#tail_window").text('[Empty file]');
                 } else {
                     //console.log("Count "+count);
                     $.each(data.loglines, function(key, val) {
@@ -35,7 +35,7 @@ function connectToServer(file_to_tail, linenum) {
                         items = [];
                     }); // end each
                     // truncate the output if it starts to get long....
-                    $('#tail_window').each(function(){
+                    $('#tail_window').each(function() {
                         maxlength = 50000;
                         thislength = $(this).html().length;
                         if (thislength > maxlength) {
@@ -45,14 +45,13 @@ function connectToServer(file_to_tail, linenum) {
                         }
                     });
                 }
-
-                connectToServer(file_to_tail,count);
+                connectToServer(file_to_tail, count);
             } // end else
         }, // end success
         error: function(request, status, err) {
             if (status == "timeout") {
                 console.log('ajax failed. reloading...');
-                connectToServer(file_to_tail,0);
+                connectToServer(file_to_tail, 0);
                 $("#tail_window").html("Local timeout, reloading...");
             } // end if
         } // end error
