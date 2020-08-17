@@ -2,7 +2,7 @@
 Produces an Javascript map (named tail_arr by default)
 
 Author: https://github.com/boinger/ / jeff@jeffvier.com
-Produced while working for Vendita (vendita.com)
+Produced while working for Vendita (https://vendita.com/)
 
 """
 
