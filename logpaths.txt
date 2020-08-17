@@ -1,0 +1,6 @@
+turtletheturtle          /var/log/messages
+goblindog                /var/log/httpd/access_log
+amarettocherrycordial    /var/log/httpd/error_log
+korvacoleman             /var/log/httpd/ssl_error_log
+vampirepenguin           /var/log/httpd/ssl_request_log
+happygilmore             /var/lib/pgsql/11/data/log/postgresql-#DAY#.log
