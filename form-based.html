@@ -9,7 +9,7 @@
     var cts = null;
     var tailfile = null
     $(document).ready(function() {
-      tailfile = $_GET('tailfile') ? $_GET('tailfile') : 'reesespieces';
+      tailfile = $_GET('tailfile') ? $_GET('tailfile') : 'turtletheturtle';
       connectToServer(tailfile, 0, function(result){
         if (result) setTimeout(function(){ $("#tail_window").scrollTop($("#tail_window")[0].scrollHeight)}, 100); // Scroll to the bottom initially
       });
@@ -39,7 +39,7 @@
   </div>
   <div id="container">
     <div id="pauseoverlay">
-      <img src="pause.svg" alt="" id="pauseicon" />
+      <img src="assets/img/pause.svg" alt="" id="pauseicon" />
     </div>
     <div id="tail_window"></div>
   </div>
