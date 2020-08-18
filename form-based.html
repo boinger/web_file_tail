@@ -13,9 +13,9 @@
       connectToServer(tailfile, 0, function(result){
         if (result) setTimeout(function(){ $("#tail_window").scrollTop($("#tail_window")[0].scrollHeight)}, 100); // Scroll to the bottom initially
       });
-      $('#tailfile').change(function() {
-        $('#tail_window').text('');
-        if(cts) cts.abort();
+      $('#tailfile').change(function() { // if the requested log file is changed, do this:
+        $('#tail_window').text(''); // blank out existing logfile tail lines
+        if(cts) cts.abort(); // stop any pending ajax calls, or the log files stack up and fight each other
         //event.preventDefault(); // Use this if you prefer single-window/non-reloading form
         $('#choosetailfile').submit();  // Use this if you prefer bookmarkable URLs
       })
