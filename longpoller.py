@@ -1,6 +1,8 @@
 """
-
 Python 3 re-implementation of LongPoller.php
+
+Author: https://github.com/boinger/ / jeff@jeffvier.com
+Produced while working for Vendita (https://vendita.com)
 
 """
 
@@ -28,6 +30,7 @@ class Main:
 
     safety_max = 130 ## seconds. It should be longer than the ajax timeout
     logpath_file = os.path.dirname(os.path.realpath(__file__)) + '/logpaths.txt'
+    initial_tail = '40'
     log.basicConfig(stream=sys.stderr, level=log.ERROR) ## ERROR, INFO, or DEBUG
 
     pather = {}
@@ -73,8 +76,6 @@ class Main:
             [str] -- latest log lines
         """
 
-        initial_tail = '20'
-
         http_post_data = urllib.parse.parse_qs(self.environ['wsgi.input'].read().decode('utf8'))
         num = int(http_post_data.get('num', [0])[0])
         file_name = self.file_path(http_post_data.get('tailfile', [None])[0])
@@ -100,7 +101,7 @@ class Main:
 
             return self._get_last_log_lines_from_pos(file_name, '+' + str(nextline))
 
-        return self._get_last_log_lines_from_pos(file_name, initial_tail)
+        return self._get_last_log_lines_from_pos(file_name, self.initial_tail)
 
 
     def _get_file_line_count(self, file_name):
