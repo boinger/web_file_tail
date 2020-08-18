@@ -61,6 +61,26 @@ function connectToServer(file_to_tail, linenum, callback=false) {
     }); // end ajax
 } // end function connectToServer
 
+function pause() {
+    if(cts) cts.abort();
+    $( "#pause" ).hide();
+    $( "#resume" ).show();
+    $("#tail_window").css("background-color", "rgba(0,0,0,0.05)");
+    $('#tail_window').css("scroll-snap-type", "none");
+    $('#pauseoverlay').fadeIn(50);
+    paused = 1;
+}
+
+function unpause() {
+    connectToServer(tailfile, loglinecount);
+    $( "#resume" ).hide();
+    $( "#pause" ).show();
+    $("#tail_window").css("background-color", "white");
+    $('#tail_window').css("scroll-snap-type", 'y');
+    $('#pauseoverlay').fadeOut(50);
+    paused = 0;
+}
+
 function $_GET(variable) {
     var query = window.location.search.substring(1);
     var vars = query.split("&");

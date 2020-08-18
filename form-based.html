@@ -61,32 +61,12 @@
       }
     });
     var paused = 0;
-    $( "#pause" ).click(function() {
-      if(cts) cts.abort();
-      $( "#pause" ).hide();
-      $( "#resume" ).show();
-      $("#tail_window").css("background-color", "rgba(0,0,0,0.05)");
-      $('#tail_window').css("scroll-snap-type", "none");
-      $('#pauseoverlay').fadeIn(50);
-      paused = 1;
-    });
-    $( "#resume" ).click(function() {
-      connectToServer(tailfile, loglinecount);
-      $( "#resume" ).hide();
-      $( "#pause" ).show();
-      $("#tail_window").css("background-color", "white");
-      $('#tail_window').css("scroll-snap-type", 'y');
-      $('#pauseoverlay').fadeOut(50);
-      paused = 0;
-    });
+    $( "#pause" ).click(function() { pause(); });
+    $( "#resume" ).click(function() { unpause(); });
     document.onkeypress = function (e) {
       var c = String.fromCharCode(e.which);
       if (c === ' ') {
-        if (paused) {
-          $( "#resume" ).click();
-        } else {
-          $( "#pause" ).click();
-        }
+        if (paused) unpause(); else pause();
       }
     };
   </script>
