@@ -1,0 +1,40 @@
+#container {
+  border: 1px solid;
+  display: flex;
+  width: 100%;
+  max-height: 75%;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+#tail_window {
+  width: 100%;
+  min-width: 600px;
+  height: 300px;
+  display: block;
+  position: relative;
+  font-family: monospace;
+  font-size: 9pt;
+  white-space: pre-wrap;
+  overflow: auto;
+  overscroll-behavior-y: contain;
+  scroll-snap-type: y;
+}
+
+div#tail_window>div:last-child {
+  scroll-snap-align: end;
+}
+
+#pauseoverlay {
+  margin: 0 auto;
+  position: absolute;
+  z-index: -1;
+  display: none;
+}
+
+#pauseicon {
+  width: 240px;
+  height: 240px;
+  opacity: 0.1;
+}
