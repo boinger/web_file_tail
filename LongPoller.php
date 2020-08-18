@@ -1,5 +1,17 @@
 <?php
 
+/*
+
+This is the original LongPoller file from https://github.com/richardvk/web_file_tail
+
+It has not been updated to mimic the features in longpoller.py and is not being maintained in this fork.
+
+Basically, I'm leaving it in as a nod to @richardvk, whose code I based the python fork on.
+
+--boinger
+
+*/
+
 $logfile = '/var/log/syslog';
 $wc = "/usr/bin/wc";
 $sudo = "/usr/bin/sudo";
