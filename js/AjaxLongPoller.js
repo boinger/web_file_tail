@@ -1,4 +1,5 @@
-function connectToServer(file_to_tail, linenum) {
+var loglinecount;
+function connectToServer(file_to_tail, linenum, callback=false) {
     cts = $.ajax({
         dataType: "json",
         url: "/admin/logtail", // Python option
@@ -15,15 +16,15 @@ function connectToServer(file_to_tail, linenum) {
             } else {
                 //console.log("Got back good data");
                 var items = [];
-                var count = parseInt(data.count);
+                loglinecount = parseInt(data.count);
                 $("#logname").text('Tailing file: ' + data.filename);
-                if (count < 0) {
+                if (loglinecount < 0) {
                     console.log('ajax failed. reloading...');
                     connectToServer(file_to_tail, linenum);
-                } else if (count === 0) {
+                } else if (loglinecount === 0) {
                     $("#tail_window").text('[Empty file]');
                 } else {
-                    //console.log("Count "+count);
+                    //console.log("Count "+loglinecount);
                     $.each(data.loglines, function(key, val) {
                         //console.log("Val "+val.toString());
                         items.push(val.toString());
@@ -45,8 +46,9 @@ function connectToServer(file_to_tail, linenum) {
                         }
                     });
                 }
-                connectToServer(file_to_tail, count);
+                connectToServer(file_to_tail, loglinecount);
             } // end else
+            if(callback) callback(true);
         }, // end success
         error: function(request, status, err) {
             if (status == "timeout") {
@@ -54,6 +56,7 @@ function connectToServer(file_to_tail, linenum) {
                 connectToServer(file_to_tail, 0);
                 $("#tail_window").html("Local timeout, reloading...");
             } // end if
+            if(callback) callback(false);
         } // end error
     }); // end ajax
 } // end function connectToServer
