@@ -28,7 +28,7 @@ class Main:
         tr {str} -- command path
     """
 
-    safety_max = 130 ## seconds. It should be longer than the ajax timeout
+    safety_max = 115 ## seconds. It should be shorter than the ajax timeout
     logpath_file = os.path.dirname(os.path.realpath(__file__)) + '/logpaths.txt'
     initial_tail = '25'
     log.basicConfig(stream=sys.stderr, level=log.ERROR) ## ERROR, INFO, or DEBUG
