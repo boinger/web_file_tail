@@ -1,0 +1,134 @@
+<html>
+<head>
+  <title>Tail Test</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <script src="/js/jquery-3.5.1.min.js"></script>
+  <script src="/js/AjaxLongPoller.js"></script>
+  <script>
+    var cts = null;
+    var tailfile = null
+    $(document).ready(function() {
+      tailfile = $_GET('tailfile') ? $_GET('tailfile') : 'reesespieces';
+      connectToServer(tailfile, 0, function(result){
+        if (result) setTimeout(function(){ $("#tail_window").scrollTop($("#tail_window")[0].scrollHeight)}, 100); // Scroll to the bottom initially
+      });
+      $('#tailfile').change(function() {
+        $('#tail_window').text('');
+        if(cts) cts.abort();
+        //event.preventDefault(); // Use this if you prefer single-window/non-reloading form
+        $('#choosetailfile').submit();  // Use this if you prefer bookmarkable URLs
+      })
+    });
+  </script>
+  <style>
+    #container {
+      border: 1px solid;
+      display: flex;
+      width: 100%;
+      max-height: 75%;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    #tail_window {
+      width: 100%;
+      min-width: 600px;
+      height: 300px;
+      display: block;
+      position: relative;
+      font-family: monospace;
+      font-size: 9pt;
+      white-space: pre-wrap;
+      overflow: auto;
+      overscroll-behavior-y: contain;
+      scroll-snap-type: y;
+    }
+
+    div#tail_window>div:last-child {
+      scroll-snap-align: end;
+    }
+
+    #pauseoverlay {
+      margin: 0 auto;
+      position: absolute;
+      z-index: -1;
+      display: none;
+    }
+
+    #pauseicon {
+      width: 240px;
+      height: 240px;
+      opacity: 0.1;
+    }
+  </style>
+</head>
+<body bgcolor="#FFFFFF" id=body>
+  <h2 align="center">Tail Test</h2>
+  <div>
+    <form id="choosetailfile" action="#">
+      <select name="tailfile" id="tailfile"></select>
+    </form>
+    <div id="logname">
+    </div>
+    <div>
+      <form id="pauseresume">
+        <input type="button" id="pause" name="pause" value="Pause">
+        <input type="button" id="resume" name="resume" value="Resume" style="display: none";>
+      </form>
+    </div>
+  </div>
+  <div id="container">
+    <div id="pauseoverlay">
+      <img src="pause.svg" alt="" id="pauseicon" />
+    </div>
+    <div id="tail_window"></div>
+  </div>
+  <script>
+    var tail_arr = new Map();
+    $.ajax({
+      url: "/admin/tailoptions",
+      dataType: "script",
+      timeout: 10000,
+      success: function() {
+        var option = '';
+        for (var codename in tail_arr) {
+          var filename = tail_arr[codename];
+          option += '<option value="' + codename + '"';
+          option += (tailfile == codename) ? ' selected' : '';
+          option += '>' + filename + '</option>';
+        }
+        $('#tailfile').append(option);
+      }
+    });
+    var paused = 0;
+    $( "#pause" ).click(function() {
+      if(cts) cts.abort();
+      $( "#pause" ).hide();
+      $( "#resume" ).show();
+      $("#tail_window").css("background-color", "rgba(0,0,0,0.1)");
+      $('#tail_window').css("scroll-snap-type", "none");
+      $('#pauseoverlay').fadeIn(50);
+      paused = 1;
+    });
+    $( "#resume" ).click(function() {
+      connectToServer(tailfile, loglinecount);
+      $( "#resume" ).hide();
+      $( "#pause" ).show();
+      $("#tail_window").css("background-color", "white");
+      $('#tail_window').css("scroll-snap-type", 'y');
+      $('#pauseoverlay').fadeOut(50);
+      paused = 0;
+    });
+    document.onkeypress = function (e) {
+      var c = String.fromCharCode(e.which);
+      if (c === ' ') {
+        if (paused) {
+          $( "#resume" ).click();
+        } else {
+          $( "#pause" ).click();
+        }
+      }
+    };
+  </script>
+</body>
+</html>
