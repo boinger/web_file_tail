@@ -21,7 +21,7 @@ function connectToServer(file_to_tail, linenum, callback=false) {
                 debug && console.log("Got back "+ loglinecount +" lines of data.");
                 $("#logname").text('Tailing file: ' + data.filename);
                 if (loglinecount < 0) {
-                    console.log('Server timeout. Retrying from line '+ linenum +'...');
+                    console.log('Server says no new lines. Retrying from line '+ linenum +'...');
                     connectToServer(file_to_tail, linenum);
                     if(callback) callback(false);
                     return; // break out so we don't overlap self-calls
