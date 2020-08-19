@@ -28,7 +28,7 @@ class Main:
         tr {str} -- command path
     """
 
-    safety_max = 115 ## seconds. It should be shorter than the ajax timeout
+    safety_max = 50 ## seconds. It should be shorter than the ajax timeout to be handled more gracefully.
     logpath_file = os.path.dirname(os.path.realpath(__file__)) + '/logpaths.txt'
     initial_tail = '25'
     log.basicConfig(stream=sys.stderr, level=log.ERROR) ## ERROR, INFO, or DEBUG
@@ -46,6 +46,7 @@ class Main:
     tail = '/usr/bin/tail'
     cut = '/usr/bin/cut'
     tr = '/usr/bin/tr'
+    stat = '/usr/bin/stat'
 
     def __init__(self, environ, start_response):
         self.environ = environ
@@ -84,20 +85,24 @@ class Main:
             log.debug('Requested starting line is %s', str(num))
             nextline = num + 1
             time.sleep(2)
-            curr_len = self._get_file_line_count(file_name)
+            curr_len = int(self._get_file_line_count(file_name))
             log.debug('File length is %s.', curr_len)
             if curr_len == num:
-                file_mtime = time.ctime(os.path.getmtime(file_name))
+                log.debug('Requested start line is same as file length. Waiting for file change...')
+                mtime_cmd = '%s %s -c %%Y %s' % (self.sudo, self.stat, file_name)
+                file_mtime = self._shell_exec(mtime_cmd)
                 current_file_mtime = file_mtime
                 safety = 0
                 while (current_file_mtime == file_mtime and safety < self.safety_max):
+                    log.debug('File mtime is %s.', current_file_mtime.strip())
+                    log.debug('Safety iteration %d.', safety)
                     time.sleep(1)
-                    current_file_mtime = time.ctime(os.path.getmtime(file_name))
+                    current_file_mtime = self._shell_exec(mtime_cmd)
                     safety += 1
 
                 if safety >= self.safety_max:
-                    ret_arr = {'count' : -1}
-                    return json.dumps(ret_arr)
+                    ret_dict = {'filename' : file_name, 'count' : -1}
+                    return json.dumps(ret_dict)
 
             return self._get_last_log_lines_from_pos(file_name, '+' + str(nextline))
 
@@ -108,7 +113,7 @@ class Main:
         line_count_cmd = '%s %s -l %s | %s -d \" \" -f 1 | %s -d \'\n\' 2>/dev/null' \
             % (self.sudo, self.wc, file_name, self.cut, self.tr)
         line_count = self._shell_exec(line_count_cmd)
-        log.debug('Pulling %s lines.', line_count)
+        log.debug('Counted %s lines.', line_count)
 
         if int(line_count) == 0:
             time.sleep(1) ## rest a second if the file is empty
@@ -120,7 +125,7 @@ class Main:
         cmd = "%s %s -n %s %s" % (self.sudo, self.tail, from_where, file_name)
         logfile_lines = self._shell_exec(cmd)
         file_len = self._get_file_line_count(file_name)
-        log.debug('Received %s log lines from %s.', str(file_len), str(from_where))
+        log.debug('Received %s log lines starting at line %s.', str(file_len), str(from_where))
 
         if int(file_len) == 0:
             time.sleep(1) ## rest a second if the file is empty
@@ -128,6 +133,8 @@ class Main:
         else:
             logfile_lines_arr = list(map(str.strip, logfile_lines.splitlines()))
 
+        log.info('Returning filename: %s; count: %s; loglines (len): %d', \
+                file_name, file_len, len(logfile_lines_arr))
         ret_dict = {'filename' : file_name, 'count' : file_len, 'loglines' : logfile_lines_arr}
         return json.dumps(ret_dict)
 
