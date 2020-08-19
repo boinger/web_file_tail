@@ -1,32 +1,35 @@
 var loglinecount;
+var debug = false;
 function connectToServer(file_to_tail, linenum, callback=false) {
+    if(cts) cts.abort();
+    debug && console.log("connectToServer requested with args: "+ file_to_tail +", "+ linenum +", "+ callback)
     cts = $.ajax({
         dataType: "json",
         url: "/admin/logtail", // Python option
         //url: "LongPoller.php", // original PHP option
         data: { num: linenum, tailfile: file_to_tail },
         type: 'POST',
-        timeout: 120000, // in milliseconds
+        timeout: 60000, // in milliseconds
         success: function(data) {
             if (data == null) {
-                //console.log("Got back junk");
-                console.log('ajax failed. reloading...');
+                console.log('ajax returned junk. reloading...');
                 connectToServer(file_to_tail, 0);
                 $("#tail_window").html("Error, reloading...");
             } else {
-                //console.log("Got back good data");
                 var items = [];
                 loglinecount = parseInt(data.count);
+                debug && console.log("Got back "+ loglinecount +" lines of data.");
                 $("#logname").text('Tailing file: ' + data.filename);
                 if (loglinecount < 0) {
-                    console.log('ajax failed. reloading...');
+                    console.log('Server timeout. Retrying from line '+ linenum +'...');
                     connectToServer(file_to_tail, linenum);
+                    if(callback) callback(false);
+                    return; // break out so we don't overlap self-calls
                 } else if (loglinecount === 0) {
                     $("#tail_window").text('[Empty file]');
                 } else {
-                    //console.log("Count "+loglinecount);
                     $.each(data.loglines, function(key, val) {
-                        //console.log("Val "+val.toString());
+                        //debug && console.log("Val "+val.toString());
                         items.push(val.toString());
                         var newlines = items.join("");
                         var div = document.createElement('div');
@@ -52,9 +55,9 @@ function connectToServer(file_to_tail, linenum, callback=false) {
         }, // end success
         error: function(request, status, err) {
             if (status == "timeout") {
-                console.log('ajax failed. reloading...');
+                console.log('ajax failed. retrying...');
+                $('#tail_window').text(''); // blank out existing logfile tail lines
                 connectToServer(file_to_tail, 0);
-                $("#tail_window").html("Local timeout, reloading...");
             } // end if
             if(callback) callback(false);
         } // end error
