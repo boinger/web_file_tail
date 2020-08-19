@@ -22,9 +22,9 @@ This is really sample code that can be modified to suit almost any realtime 'pus
  * Once the ctime is updated, the script retreives the new lines and returns them to the client (in a JSON bundle), who once again processes them, adds them to the div and then makes a new request to the server... and so the process continues!
 
 ## Behind-the-scenes details:
- * The javascript uses jquery's .ajax() method since this allows for a timeout to be set. Currently an arbitrary timeout of 120s is used since the test log we are using returns data at least every minute, so in theory the timeout should never be reached.
+ * The javascript uses jquery's .ajax() method since this allows for a timeout to be set. Currently an arbitrary timeout of 60 seconds is used since the test log we are using returns data at least every minute, so in theory the timeout should never be reached.
 
- * The server will also NOT sit in its one second check loop indefinately. It prevents this by exiting the loop after 115 iterations. That is, it should terminate after 115 seconds, which is shorter than the clients timeout. This is because if both client and server are still running and the client times out first, the client will make a new request while the original is still running. There might not be any real implication though.
+ * The server will also NOT sit in its one second check loop indefinately. It prevents this by exiting the loop after 50 iterations. That is, it should terminate after 50 seconds, which is shorter than the client's timeout. This is because if both client and server are still running and the client times out first, the client will make a new request while the original is still running. This doesn't cause any issues other than some overlapping requests, but it still is handled more gracefully if the script tells the browser it failed to return fresh data.  There may be better way to deal with this overall that I'm missing, perhaps.
 
  * This code defaults to tailing /var/log/messages (standard system log path on an Linux system). This requires read rights for the web server user (www-data, but this may differ on your system) to the file, which was achieved by making system calls as root using 'sudo', which necessitated adding privileges to the sudoers config:
 
