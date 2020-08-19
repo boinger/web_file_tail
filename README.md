@@ -10,10 +10,10 @@ This is really sample code that can be modified to suit almost any realtime 'pus
 # Notes:
 ## Config:
  * In apache, once you have WSGI functionality working (which is beyond the scope of this doc), you will need a couple lines like this in your config:
- 	<code>
+```
     WSGIScriptAlias /admin/logtail /var/www/sbin/longpoller.py
     WSGIScriptAlias /admin/tailoptions /var/www/sbin/tailoptions.py
-	</code>
+```
 
 ## Functionality Basics:
  * When called for the first time, the script sends a request for a file from the server with 0 (zero) as the current line count.
