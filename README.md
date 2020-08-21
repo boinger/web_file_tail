@@ -16,7 +16,9 @@ This is really sample code that can be modified to suit almost any realtime 'pus
 ```
  * This code defaults to tailing /var/log/messages (standard system log path on an Linux system). This requires read rights for the web server user (which is often 'apache' or 'www-data', but this may differ on your system), which is most easily achieved by making system calls as root using 'sudo', which necessitated adding privileges to the sudoers config for allowing executing the 'logtail.py' script, which handles the system-level interaction with the log files:
 
-  `apache ALL=(ALL) NOPASSWD:/usr/sbin/logtail.py`
+```
+  apache ALL=(ALL) NOPASSWD:/usr/sbin/logtail.py
+ ```
 
 ## Functionality Basics:
  * When called for the first time, the script sends a request for a file from the server with 0 (zero) as the current line count.
