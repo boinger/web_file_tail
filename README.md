@@ -14,6 +14,9 @@ This is really sample code that can be modified to suit almost any realtime 'pus
     WSGIScriptAlias /admin/logtail /var/www/sbin/longpoller.py
     WSGIScriptAlias /admin/tailoptions /var/www/sbin/tailoptions.py
 ```
+ * This code defaults to tailing /var/log/messages (standard system log path on an Linux system). This requires read rights for the web server user (which is often 'apache' or 'www-data', but this may differ on your system), which is most easily achieved by making system calls as root using 'sudo', which necessitated adding privileges to the sudoers config for allowing executing the 'logtail.py' script, which handles the system-level interaction with the log files:
+
+  `apache ALL=(ALL) NOPASSWD:/usr/sbin/logtail.py`
 
 ## Functionality Basics:
  * When called for the first time, the script sends a request for a file from the server with 0 (zero) as the current line count.
@@ -33,9 +36,6 @@ This is really sample code that can be modified to suit almost any realtime 'pus
 
  * The server will also NOT sit in its one second check loop indefinately. It prevents this by exiting the loop after 50 iterations. That is, it should terminate after 50 seconds, which is shorter than the client's timeout. This is because if both client and server are still running and the client times out first, the client will make a new request while the original is still running. This doesn't cause any issues other than some overlapping requests, but it still is handled more gracefully if the script tells the browser it failed to return fresh data.  There may be better way to deal with this overall that I'm missing, perhaps.
 
- * This code defaults to tailing /var/log/messages (standard system log path on an Linux system). This requires read rights for the web server user (www-data, but this may differ on your system) to the file, which was achieved by making system calls as root using 'sudo', which necessitated adding privileges to the sudoers config:
-
-  `%www-data ALL=(ALL) NOPASSWD: /usr/bin/wc, /usr/bin/tail`
 
 # TODO:
-* breakout system-level access to a dedicated script so as to simplify sudo requirements, as well as increase security slightly.
+* [none right now]
