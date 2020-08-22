@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Python 3 re-implementation of LongPoller.php
 

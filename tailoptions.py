@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Produces an Javascript map (named tail_arr by default)
 

@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python3
 
 """
 Command-line interaction script for web_file_tail (mainly to simplify sudo needs)
