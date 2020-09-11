@@ -24,7 +24,7 @@ class Main:
         logtail_py {str} -- path to logtail handler (so that we only have to give sudo
                 perms for this one command)
         logpath_file {str} -- text file full of k:v pairs like "codeword: /full/log/path/to/filename.log"
-        initial_tail {int} -- defailt tail length
+        initial_tail {int} -- default tail length
         safety_max {int} -- seconds. safety fallback timeout.  should be longer than ajax timeout
         sudo {str} -- command path
     """
