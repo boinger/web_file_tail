@@ -16,6 +16,7 @@ import json
 import urllib.parse
 import logging as log
 
+
 class Main:
     """Display stuff
 
@@ -28,13 +29,13 @@ class Main:
         sudo {str} -- command path
     """
 
-    safety_max = 50 ## seconds. It should be shorter than the ajax timeout.
+    safety_max = 50  # seconds. It should be shorter than the ajax timeout.
     logpath_file = os.path.dirname(os.path.realpath(__file__)) + '/logpaths.txt'
     initial_tail = '25'
     sudo = '/usr/bin/sudo'
-    logtail_py = '/usr/local/sbin/logtail.py' ## this should of course point to the path where you put this script.
+    logtail_py = '/usr/local/sbin/logtail.py'  # this should of course point to the path where you put this script.
 
-    log.basicConfig(stream=sys.stderr, level=log.ERROR) ## ERROR, INFO, or DEBUG
+    log.basicConfig(stream=sys.stderr, level=log.ERROR)  # ERROR, INFO, or DEBUG
 
     pather = {}
     with open(logpath_file) as f:
@@ -89,7 +90,7 @@ class Main:
                 file_mtime = self._sudo_exec(mtime_cmd)
                 current_file_mtime = file_mtime
                 safety = 0
-                while (current_file_mtime == file_mtime and safety < self.safety_max):
+                while current_file_mtime == file_mtime and safety < self.safety_max:
                     log.debug('File mtime is %s.', current_file_mtime.strip())
                     log.debug('Safety iteration %d.', safety)
                     time.sleep(1)
@@ -97,13 +98,12 @@ class Main:
                     safety += 1
 
                 if safety >= self.safety_max:
-                    ret_dict = {'filename' : file_name, 'count' : -1}
+                    ret_dict = {'filename': file_name, 'count': -1}
                     return json.dumps(ret_dict)
 
             return self._get_last_log_lines_from_pos(file_name, '+' + str(nextline))
 
         return self._get_last_log_lines_from_pos(file_name, self.initial_tail)
-
 
     def _get_file_line_count(self, file_name):
         cmd = '%s --func linecount %s' % (self.logtail_py, file_name)
@@ -118,11 +118,11 @@ class Main:
         file_len = self._get_file_line_count(file_name)
 
         if int(len(logfile_lines_arr)) == 0:
-            time.sleep(1) ## rest a second if the file is empty
+            time.sleep(1)  # rest a second if the file is empty
 
-        log.info('Returning filename: %s; count: %s; loglines (len): %d', \
-                file_name, file_len, len(logfile_lines_arr))
-        ret_dict = {'filename' : file_name, 'count' : file_len, 'loglines' : logfile_lines_arr}
+        log.info('Returning filename: %s; count: %s; loglines (len): %d',
+                 file_name, file_len, len(logfile_lines_arr))
+        ret_dict = {'filename': file_name, 'count': file_len, 'loglines': logfile_lines_arr}
         return json.dumps(ret_dict)
 
     def _sudo_exec(self, command):
@@ -139,9 +139,9 @@ class Main:
         log.debug('SUDO Executing: %s', repr(command))
         command = '%s %s' % (self.sudo, command)
         try:
-            output = subprocess.check_output(command, \
-                     shell=True, \
-                     ).decode('utf-8').strip()
+            output = subprocess.check_output(command,
+                                             shell=True,
+                                             ).decode('utf-8').strip()
 
         except OSError as oserr:
             log.error("OS error")
@@ -159,6 +159,7 @@ class Main:
             return output
 
         return ''
+
 
 def application(environ, response):
     """

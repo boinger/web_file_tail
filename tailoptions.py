@@ -12,6 +12,7 @@ import os
 import sys
 import logging as log
 
+
 class Main:
     """Return back a Javascript-consumable map
 
@@ -22,11 +23,10 @@ class Main:
         logpath_file {str} -- static (for now) path of logfile to tail
     """
 
-    js_map_name = 'tail_arr' ## what is the js lib expecting to see?
+    js_map_name = 'tail_arr'  # what is the js lib expecting to see?
     logpath_file = os.path.dirname(os.path.realpath(__file__)) + '/logpaths.txt'
 
-    log.basicConfig(stream=sys.stderr, level=log.ERROR) ## ERROR, INFO, or DEBUG
-
+    log.basicConfig(stream=sys.stderr, level=log.ERROR)  # ERROR, INFO, or DEBUG
 
     def __init__(self, environ, start_response):
         self.environ = environ
@@ -43,7 +43,7 @@ class Main:
         Returns:
             string: a Javascript map
         """
-        return mapname +' = ' + str(pydict)
+        return mapname + ' = ' + str(pydict)
 
     def list_options(self):
         """Lists the options for consumption by Javascript
@@ -58,6 +58,7 @@ class Main:
                 path_dict[key] = val
 
         return self.js_mapify(self.js_map_name, path_dict)
+
 
 def application(environ, response):
     """

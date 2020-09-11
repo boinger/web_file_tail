@@ -14,7 +14,7 @@ import sys
 import logging as log
 import argparse
 
-log.basicConfig(stream=sys.stderr, level=log.ERROR) ## ERROR, INFO, or DEBUG
+log.basicConfig(stream=sys.stderr, level=log.ERROR)  # ERROR, INFO, or DEBUG
 
 WC = '/usr/bin/wc'
 TAIL = '/usr/bin/tail'
@@ -23,6 +23,7 @@ TR = '/usr/bin/tr'
 STAT = '/usr/bin/stat'
 
 VERSION = '0.0.1'
+
 
 def init_argparse() -> argparse.ArgumentParser:
     """Parse args"""
@@ -42,6 +43,7 @@ def init_argparse() -> argparse.ArgumentParser:
     parser.add_argument("-v", "--version", action="version", version=f"{parser.prog} v" + VERSION)
     return parser
 
+
 def isreadable(file):
     """check if file is readable
     """
@@ -51,6 +53,7 @@ def isreadable(file):
         fp = open(file, "r")
         return fp.readable()
     return False
+
 
 def mtime(file):
     """get file mtime
@@ -65,18 +68,20 @@ def mtime(file):
     log.error('File not readable')
     return False
 
+
 def linecount(file):
     """get file line count
     """
     log.debug('Beginning linecount()')
     if isreadable(file):
         line_count_cmd = '%s -l %s | %s -d \" \" -f 1 | %s -d \'\n\' 2>/dev/null' \
-            % (WC, file, CUT, TR)
+                         % (WC, file, CUT, TR)
         line_count = shell_exec(line_count_cmd)
         log.debug('Counted %s lines.', line_count)
         return line_count
     log.error('File not readable')
     return False
+
 
 def tail(file, from_where):
     """tail file from indicated line number
@@ -96,6 +101,7 @@ def tail(file, from_where):
     log.error('File not readable')
     return False
 
+
 def shell_exec(command):
     """Executes a specified command in a shell and returns stdout
 
@@ -109,9 +115,9 @@ def shell_exec(command):
 
     log.debug('Executing: %s', repr(command))
     try:
-        output = subprocess.check_output(command, \
-                 shell=True, \
-                 ).decode('utf-8').strip()
+        output = subprocess.check_output(command,
+                                         shell=True,
+                                         ).decode('utf-8').strip()
     except OSError as oserr:
         log.error("OS error")
         log.error(oserr)
@@ -124,7 +130,7 @@ def shell_exec(command):
         log.error("Exception caught")
         log.error(ex)
         return ex
-    ##log.debug('Output: %s', output) ## this creates a mess
+    # log.debug('Output: %s', output) ## this creates a mess
     if output:
         return output
 
@@ -150,6 +156,7 @@ def main() -> None:
     except (FileNotFoundError, IsADirectoryError) as err:
         print(f"{parser.prog}: {file}: {err.strerror}", file=sys.stderr)
     sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
