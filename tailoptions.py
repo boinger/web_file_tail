@@ -17,7 +17,7 @@ class Main:
     """Return back a Javascript-consumable map
 
     Variables:
-        js_map_name [str} -- what map/array name is the js lib expecting to see?
+        js_map_name {str} -- what map/array name is the js lib expecting to see?
                 If used as intended, the returned code will be directly executed
                 in the browser.
         logpath_file {str} -- static (for now) path of logfile to tail
