@@ -2,8 +2,6 @@
 
 Watch a file `tail -F` in real time in a web browser using AJAX long-polling and jQuery.
 
-Forked from [richardvk/web_file_tail](https://github.com/richardvk/web_file_tail) (PHP) and rewritten in Python 3 / WSGI.
-
 > **Warning**: This exposes system log files over HTTP. **Never** run this on a publicly-facing server. At minimum, put it behind a VPN and password-protect it. You have been warned.
 
 ## How It Works
