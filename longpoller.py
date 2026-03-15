@@ -37,17 +37,37 @@ class Main:
 
     log.basicConfig(stream=sys.stderr, level=log.ERROR)  # ERROR, INFO, or DEBUG
 
-    pather = {}
-    with open(logpath_file) as f:
-        for line in f:
-            (key, val) = line.split()
-            if '#DAY#' in val:
-                val = val.replace('#DAY#', datetime.datetime.now().strftime('%a'))
-            pather[key] = val
-
     def __init__(self, environ, start_response):
         self.environ = environ
         self.start = start_response
+        self.pather = self._load_logpaths()
+
+    def _load_logpaths(self):
+        """Parse logpaths.txt, substituting #DAY# with current weekday.
+
+        Returns:
+            dict: codename -> file path mapping
+        """
+        paths = {}
+        try:
+            with open(self.logpath_file) as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith('#'):
+                        continue
+                    parts = line.split()
+                    if len(parts) != 2:
+                        log.warning('Skipping malformed logpaths line: %s', line)
+                        continue
+                    key, val = parts
+                    if '#DAY#' in val:
+                        val = val.replace('#DAY#', datetime.datetime.now().strftime('%a'))
+                    paths[key] = val
+        except FileNotFoundError:
+            log.error('logpaths.txt not found: %s', self.logpath_file)
+        except PermissionError:
+            log.error('logpaths.txt not readable: %s', self.logpath_file)
+        return paths
 
     def file_path(self, fakename='thiswontwork'):
         """Translates codenames to log file paths

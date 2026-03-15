@@ -50,12 +50,22 @@ class Main:
 
         """
         path_dict = {}
-        with open(self.logpath_file) as file:
-            for line in file:
-                (key, val) = line.split()
-                if '#DAY#' in val:
-                    val = val.replace('#DAY#', datetime.datetime.now().strftime('%a'))
-                path_dict[key] = val
+        try:
+            with open(self.logpath_file) as file:
+                for line in file:
+                    line = line.strip()
+                    if not line or line.startswith('#'):
+                        continue
+                    parts = line.split()
+                    if len(parts) != 2:
+                        log.warning('Skipping malformed logpaths line: %s', line)
+                        continue
+                    key, val = parts
+                    if '#DAY#' in val:
+                        val = val.replace('#DAY#', datetime.datetime.now().strftime('%a'))
+                    path_dict[key] = val
+        except (FileNotFoundError, PermissionError) as err:
+            log.error('logpaths.txt error: %s', err)
 
         return self.js_mapify(self.js_map_name, path_dict)
 
