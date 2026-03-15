@@ -18,8 +18,6 @@ log.basicConfig(stream=sys.stderr, level=log.ERROR)  # ERROR, INFO, or DEBUG
 
 WC = '/usr/bin/wc'
 TAIL = '/usr/bin/tail'
-CUT = '/usr/bin/cut'
-TR = '/usr/bin/tr'
 STAT = '/usr/bin/stat'
 
 VERSION = '0.0.1'
@@ -60,8 +58,7 @@ def mtime(file):
     # pylint: disable-msg=unused-variable
     log.debug('Beginning mtime()')
     if isreadable(file):
-        mtime_cmd = '%s -c %%Y %s' % (STAT, file)
-        output = shell_exec(mtime_cmd)
+        output = shell_exec([STAT, '-c', '%Y', file])
         log.debug('shell_exec() returned: %s', output)
         return output
     log.error('File not readable')
@@ -73,9 +70,8 @@ def linecount(file):
     """
     log.debug('Beginning linecount()')
     if isreadable(file):
-        line_count_cmd = '%s -l %s | %s -d \" \" -f 1 | %s -d \'\n\' 2>/dev/null' \
-                         % (WC, file, CUT, TR)
-        line_count = shell_exec(line_count_cmd)
+        output = shell_exec([WC, '-l', file])
+        line_count = output.split()[0] if output else '0'
         log.debug('Counted %s lines.', line_count)
         return line_count
     log.error('File not readable')
@@ -93,8 +89,7 @@ def tail(file, from_where):
     log.debug('Beginning tail()')
     if isreadable(file):
         log.debug('File is readable')
-        cmd = "%s -n %s %s" % (TAIL, from_where, file)
-        logfile_lines = shell_exec(cmd)
+        logfile_lines = shell_exec([TAIL, '-n', from_where, file])
 
         return logfile_lines
     log.error('File not readable')
@@ -102,11 +97,10 @@ def tail(file, from_where):
 
 
 def shell_exec(command):
-    """Executes a specified command in a shell and returns stdout
+    """Executes a specified command and returns stdout
 
     Args:
-        command (string): The full path of the script to execute
-            or the name of the command in the PATH
+        command (list): Command and arguments as a list
 
     Returns:
         string: stdout
@@ -114,9 +108,7 @@ def shell_exec(command):
 
     log.debug('Executing: %s', repr(command))
     try:
-        output = subprocess.check_output(command,
-                                         shell=True,
-                                         ).decode('utf-8').strip()
+        output = subprocess.check_output(command).decode('utf-8').strip()
     except OSError as oserr:
         log.error("OS error")
         log.error(oserr)

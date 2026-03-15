@@ -86,7 +86,7 @@ class Main:
             log.debug('File length is %s.', curr_len)
             if curr_len == num:
                 log.debug('Requested start line is same as file length. Waiting for file change...')
-                mtime_cmd = '%s --func mtime %s' % (self.logtail_py, file_name)
+                mtime_cmd = [self.logtail_py, '--func', 'mtime', file_name]
                 file_mtime = self._sudo_exec(mtime_cmd)
                 current_file_mtime = file_mtime
                 safety = 0
@@ -106,13 +106,13 @@ class Main:
         return self._get_last_log_lines_from_pos(file_name, self.initial_tail)
 
     def _get_file_line_count(self, file_name):
-        cmd = '%s --func linecount %s' % (self.logtail_py, file_name)
+        cmd = [self.logtail_py, '--func', 'linecount', file_name]
         line_count = self._sudo_exec(cmd)
         log.debug('Counted %s lines.', line_count)
         return line_count
 
     def _get_last_log_lines_from_pos(self, file_name, from_where):
-        cmd = '%s --func tail --num %s %s' % (self.logtail_py, from_where, file_name)
+        cmd = [self.logtail_py, '--func', 'tail', '--num', str(from_where), file_name]
         logfile_lines = self._sudo_exec(cmd)
         logfile_lines_arr = list(map(str.strip, logfile_lines.splitlines()))
         file_len = self._get_file_line_count(file_name)
@@ -126,35 +126,32 @@ class Main:
         return json.dumps(ret_dict)
 
     def _sudo_exec(self, command):
-        """Executes a specified command in a shell and returns stdout
+        """Executes a specified command via sudo and returns stdout
 
         Args:
-            command (string): The full path of the script to execute
-                or the name of the command in the PATH
+            command (list): Command and arguments as a list
 
         Returns:
             string: stdout
         """
 
         log.debug('SUDO Executing: %s', repr(command))
-        command = '%s %s' % (self.sudo, command)
+        command = [self.sudo] + command
         try:
-            output = subprocess.check_output(command,
-                                             shell=True,
-                                             ).decode('utf-8').strip()
+            output = subprocess.check_output(command).decode('utf-8').strip()
 
         except OSError as oserr:
             log.error("OS error")
             log.error(oserr)
-            return oserr
+            return str(oserr)
         except subprocess.CalledProcessError as ex:
             log.error("CalledProcessError caught")
             log.error(ex)
-            return ex
+            return str(ex)
         except BaseException as ex:
             log.error("Exception caught")
             log.error(ex)
-            return ex
+            return str(ex)
         if output:
             return output
 
