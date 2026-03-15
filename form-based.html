@@ -1,7 +1,9 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <title>Somewhat fancier log file tail</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="assets/css/filetail.css" />
   <script src="assets/js/jquery-3.5.1.min.js"></script>
   <script src="assets/js/AjaxLongPoller.js"></script>
@@ -30,8 +32,8 @@
     });
   </script>
 </head>
-<body bgcolor="#FFFFFF" id=body>
-  <h2 align="center">Log Tail</h2>
+<body id="body">
+  <h2 style="text-align: center">Log Tail</h2>
   <div>
     <form id="choosetailfile" action="#">
       <label for="tailfile">Filename to tail</label><select name="tailfile" id="tailfile"></select>
@@ -47,7 +49,7 @@
   </div>
   <div id="container">
     <div id="pauseoverlay">
-      <img src="assets/img/pause.svg" alt="" id="pauseicon" />
+      <img src="assets/img/pause.svg" alt="Paused" id="pauseicon" />
     </div>
     <div id="tail_window"></div>
   </div>
@@ -71,9 +73,9 @@
     var paused = 0;
     $( "#pause" ).click(function() { pause(); });
     $( "#resume" ).click(function() { unpause(); });
-    document.onkeypress = function (e) {
-      var c = String.fromCharCode(e.which);
-      if (c === ' ') {
+    document.onkeydown = function (e) {
+      if (e.key === ' ') {
+        e.preventDefault();
         if (paused) unpause(); else pause();
       }
     };

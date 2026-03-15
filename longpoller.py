@@ -136,7 +136,7 @@ class Main:
         logfile_lines_arr = list(map(str.strip, logfile_lines.splitlines()))
         file_len = self._get_file_line_count(file_name)
 
-        if int(len(logfile_lines_arr)) == 0:
+        if len(logfile_lines_arr) == 0:
             time.sleep(1)  # rest a second if the file is empty
 
         log.info('Returning filename: %s; count: %s; loglines (len): %d',
