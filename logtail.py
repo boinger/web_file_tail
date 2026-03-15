@@ -47,11 +47,10 @@ def init_argparse() -> argparse.ArgumentParser:
 def isreadable(file):
     """check if file is readable
     """
-    # pylint: disable-msg=unused-variable
     log.debug('Beginning isreadable()')
     if os.path.exists(file) and not os.path.isdir(file):
-        fp = open(file, "r")
-        return fp.readable()
+        with open(file, "r") as fp:
+            return fp.readable()
     return False
 
 
@@ -121,20 +120,20 @@ def shell_exec(command):
     except OSError as oserr:
         log.error("OS error")
         log.error(oserr)
-        return oserr
+        return str(oserr)
     except subprocess.CalledProcessError as ex:
         log.error("CalledProcessError caught")
         log.error(ex)
-        return ex
+        return str(ex)
     except BaseException as ex:
         log.error("Exception caught")
         log.error(ex)
-        return ex
+        return str(ex)
     # log.debug('Output: %s', output) ## this creates a mess
     if output:
         return output
 
-    return True
+    return ''
 
 
 def main() -> None:
@@ -160,4 +159,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-sys.exit(99)
+    sys.exit(99)
