@@ -16,7 +16,6 @@ function connectToServer(file_to_tail, linenum, callback=false) {
                 connectToServer(file_to_tail, 0);
                 $("#tail_window").html("Error, reloading...");
             } else {
-                var items = [];
                 loglinecount = parseInt(data.count);
                 debug && console.log("Got back "+ loglinecount +" lines of data.");
                 $("#logname").text('Tailing file: ' + data.filename);
@@ -29,25 +28,17 @@ function connectToServer(file_to_tail, linenum, callback=false) {
                     $("#tail_window").text('[Empty file]');
                 } else {
                     $.each(data.loglines, function(key, val) {
-                        //debug && console.log("Val "+val.toString());
-                        items.push(val.toString());
-                        var newlines = items.join("");
                         var div = document.createElement('div');
-                        clean_line = document.createTextNode(newlines);
-                        div.appendChild(clean_line);
+                        var text = document.createTextNode(val.toString());
+                        div.appendChild(text);
                         $("#tail_window").append(div);
-                        items = [];
                     }); // end each
-                    // truncate the output if it starts to get long....
-                    $('#tail_window').each(function() {
-                        maxlength = 50000;
-                        thislength = $(this).html().length;
-                        if (thislength > maxlength) {
-                            lengthdelta = thislength - maxlength;
-                            var truncated = $(this).html().substr(lengthdelta);
-                            $(this).html('[...] ' + truncated);
-                        }
-                    });
+                    // truncate by removing oldest lines to keep DOM manageable
+                    var maxLines = 5000;
+                    var tw = document.getElementById('tail_window');
+                    while (tw && tw.childNodes.length > maxLines) {
+                        tw.removeChild(tw.firstChild);
+                    }
                 }
                 connectToServer(file_to_tail, loglinecount);
             } // end else

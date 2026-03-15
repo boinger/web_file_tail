@@ -8,6 +8,7 @@ Produced while working for Vendita (https://vendita.com/)
 """
 
 import datetime
+import json
 import os
 import sys
 import logging as log
@@ -43,7 +44,7 @@ class Main:
         Returns:
             string: a Javascript map
         """
-        return mapname + ' = ' + str(pydict)
+        return mapname + ' = ' + json.dumps(pydict)
 
     def list_options(self):
         """Lists the options for consumption by Javascript
