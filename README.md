@@ -1,43 +1,101 @@
 # web_file_tail
-Watch a file `tail -F` in real time on a web browser using longpolling and jquery.
 
-This is really sample code that can be modified to suit almost any realtime 'push to the browser' requirement.
+Watch a file `tail -F` in real time in a web browser using AJAX long-polling and jQuery.
 
-**_Important_**: You should basically never run this on a publicly-facing web server.  You are introducing a **MASSIVE SECURITY HOLE** by allowing visibility to system logs.  At the _very, very least_ this should be password-protected.  Really, though, you should have significant, real security around this thing (like, behind a VPN at least).
+Forked from [richardvk/web_file_tail](https://github.com/richardvk/web_file_tail) (PHP) and rewritten in Python 3 / WSGI.
 
-**Don't say I didn't warn you.**
+> **Warning**: This exposes system log files over HTTP. **Never** run this on a publicly-facing server. At minimum, put it behind a VPN and password-protect it. You have been warned.
 
-# Notes:
-## Config:
- * In apache, once you have WSGI functionality working (which is beyond the scope of this doc), you will need a couple lines like this in your config:
+## How It Works
+
+The browser makes a POST request to the server with the last known line count (or 0 on first load). The server checks the file:
+
+- **New lines available** → returns them immediately as JSON along with the updated line count.
+- **No new lines** → polls the file's mtime once per second for up to 50 seconds. If the file changes, returns the new lines. If 50 seconds pass with no change, returns `count: -1` and the client retries.
+
+The browser renders each line into a `<div>`, auto-scrolls to the bottom, and immediately makes the next request. This loop continues indefinitely.
+
+The server-side poll timeout (50s) is intentionally shorter than the client AJAX timeout (60s) to prevent overlapping requests.
+
+## Setup
+
+### Requirements
+
+- Python 3 (no third-party packages)
+- A WSGI server (Apache + mod_wsgi, gunicorn, etc.)
+- `sudo` access for the web server user to run `logtail.py`
+
+### 1. Deploy the files
+
+Place the Python scripts somewhere the WSGI server can reach. The default path in the code is `/usr/local/sbin/logtail.py` — edit `longpoller.py` line 36 (`logtail_py`) if yours differs.
+
+The HTML/JS/CSS files go wherever your web server serves static content.
+
+### 2. Configure WSGI
+
+For Apache with mod_wsgi, add to your site config:
+
+```apache
+WSGIScriptAlias /admin/logtail /var/www/sbin/longpoller.py
+WSGIScriptAlias /admin/tailoptions /var/www/sbin/tailoptions.py
 ```
-    WSGIScriptAlias /admin/logtail /var/www/sbin/longpoller.py
-    WSGIScriptAlias /admin/tailoptions /var/www/sbin/tailoptions.py
-```
- * This code defaults to tailing /var/log/messages (standard system log path on an Linux system). This requires read rights for the web server user (which is often 'apache' or 'www-data', but this may differ on your system), which is most easily achieved by making system calls as root using 'sudo', which necessitated adding privileges to the sudoers config for allowing executing the 'logtail.py' script, which handles the system-level interaction with the log files:
+
+### 3. Configure sudo
+
+The web server user needs passwordless sudo for `logtail.py` only:
 
 ```
-  apache ALL=(ALL) NOPASSWD:/usr/local/sbin/logtail.py
- ```
+apache ALL=(ALL) NOPASSWD:/usr/local/sbin/logtail.py
+```
 
-## Functionality Basics:
- * When called for the first time, the script sends a request for a file from the server with 0 (zero) as the current line count.
+Replace `apache` with your web server user (`www-data`, etc.).
 
- * It then waits for the server, which should initially return the last 25 (default) lines of the log file back to the browser as a JSON bundle, as well as the current total line count of the file.
+### 4. Configure log files
 
- * The browser then processes the returned JSON data, putting each line in a div and then immediately makes an new call to the server again, but with the previous line count included in the ajax call (instead of 0) so the server knows what the last line was that the client received.
+Edit `logpaths.txt` (must be in the same directory as `longpoller.py` and `tailoptions.py`). Each line maps a codename to a file path:
 
- * The server checks the current file line count to determine if any new lines were written since the last request; if so it returns them and the new file line count and the process repeats in a loop.
+```
+mycodename    /var/log/messages
+anothercode   /var/log/httpd/error_log
+```
 
- * If no new lines have yet been added since the last call, then the server script looks at the current file mtime to note when it was last updated, and then goes into a one second loop, checking the file's mtime and comparing it to when the client made the request.
+- Codenames are what the browser sends — actual file paths never leave the server.
+- Use `#DAY#` in a path to substitute the abbreviated weekday (e.g., `Mon`, `Tue`), useful for day-rotated logs like PostgreSQL.
+- Blank lines and lines starting with `#` are ignored.
 
- * Once the mtime is updated, the script retrieves the new lines and returns them to the client (in a JSON bundle), who once again processes them, adds them to the div and then makes a new request to the server... and so the process continues!
+### 5. Open in browser
 
-## Behind-the-scenes details:
- * The javascript uses jquery's .ajax() method since this allows for a timeout to be set. Currently an arbitrary timeout of 60 seconds is used since the test log we are using returns data at least every minute, so in theory the timeout should never be reached.
+- **Simple view** (single file via query param): `http://yourserver/path/to/index.html?tailfile=mycodename`
+- **Form-based view** (dropdown selector + pause/resume): `http://yourserver/path/to/form-based.html`
 
- * The server will also NOT sit in its one second check loop indefinitely. It prevents this by exiting the loop after 50 iterations. That is, it should terminate after 50 seconds, which is shorter than the client's timeout. This is because if both client and server are still running and the client times out first, the client will make a new request while the original is still running. This doesn't cause any issues other than some overlapping requests, but it still is handled more gracefully if the script tells the browser it failed to return fresh data.  There may be better way to deal with this overall that I'm missing, perhaps.
+The form-based view supports spacebar to toggle pause.
 
+## File Overview
 
-# TODO:
-* [none right now]
+| File | Purpose |
+|------|---------|
+| `longpoller.py` | WSGI app — receives tail requests, delegates file I/O to `logtail.py` via sudo, returns JSON |
+| `logtail.py` | CLI tool — provides `linecount`, `mtime`, `isreadable`, and `tail` operations on files. Runs under sudo so only this one script needs elevated privileges. |
+| `tailoptions.py` | WSGI app — returns `logpaths.txt` contents as a JS-consumable map for the form-based UI dropdown |
+| `logpaths.txt` | Codename → file path mapping (space-delimited, one per line) |
+| `index.html` | Minimal frontend — tails a single file specified via `?tailfile=` query param |
+| `form-based.html` | Full-featured frontend — dropdown file selector, pause/resume, auto-scroll |
+| `assets/js/AjaxLongPoller.js` | Client-side long-polling, DOM rendering, pause/unpause, `$_GET` helper |
+| `assets/css/filetail.css` | Styles for the tail window and pause overlay |
+| `assets/js/jquery-3.7.1.min.js` | Vendored jQuery |
+| `deprecated/LongPoller.php` | Original PHP implementation from upstream — not maintained |
+
+## Configuration Reference
+
+| Setting | File | Default | Description |
+|---------|------|---------|-------------|
+| `logtail_py` | `longpoller.py:36` | `/usr/local/sbin/logtail.py` | Path to the logtail CLI script |
+| `safety_max` | `longpoller.py:32` | `50` | Max seconds to poll for file changes before returning -1 |
+| `initial_tail` | `longpoller.py:34` | `25` | Number of lines to return on first request |
+| `timeout` | `AjaxLongPoller.js:12` | `60000` | Client AJAX timeout in milliseconds (must be > safety_max) |
+| `maxLines` | `AjaxLongPoller.js:37` | `5000` | Max DOM nodes before oldest lines are pruned |
+| Log level | `longpoller.py:38` | `ERROR` | Change to `INFO` or `DEBUG` for troubleshooting (logs to stderr) |
+
+## Acknowledgments
+
+Based on [richardvk/web_file_tail](https://github.com/richardvk/web_file_tail). Python rewrite by [@boinger](https://github.com/boinger).
