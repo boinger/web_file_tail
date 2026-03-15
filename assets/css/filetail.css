@@ -18,7 +18,7 @@
   white-space: pre-wrap;
   overflow: auto;
   overscroll-behavior-y: contain;
-  scroll-snap-type: y;
+  scroll-snap-type: y proximity;
 }
 
 #tail_window>div:last-child {
@@ -28,7 +28,7 @@
 #pauseoverlay {
   margin: 0 auto;
   position: absolute;
-  z-index: -1;
+  z-index: 10;
   display: none;
   opacity: 0.8;
 }

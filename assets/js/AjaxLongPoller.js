@@ -70,7 +70,7 @@ function unpause() {
     $( "#resume" ).hide();
     $( "#pause" ).show();
     $("#tail_window").css("background-color", "white");
-    $('#tail_window').css("scroll-snap-type", 'y');
+    $('#tail_window').css("scroll-snap-type", 'y proximity');
     $('#pauseoverlay').fadeOut(50);
     paused = 0;
 }
@@ -81,7 +81,7 @@ function $_GET(variable) {
     for (var i = 0; i < vars.length; i++) {
         var pair = vars[i].split("=");
         if (pair[0] == variable) {
-            return unescape(pair[1]);
+            return decodeURIComponent(pair.slice(1).join("="));
         }
     }
     return false;

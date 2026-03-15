@@ -101,7 +101,6 @@ class Main:
         if num:
             log.debug('Requested starting line is %s', str(num))
             nextline = num + 1
-            time.sleep(2)
             curr_len = int(self._get_file_line_count(file_name))
             log.debug('File length is %s.', curr_len)
             if curr_len == num:
@@ -187,7 +186,7 @@ def application(environ, response):
     app = Main(environ, response)
     output = bytes(app.tail_file(), encoding='utf-8')
 
-    response_headers = [('Content-type', 'text/plain'),
+    response_headers = [('Content-type', 'application/json'),
                         ('Content-Length', str(len(output)))]
     response(status, response_headers)
 
